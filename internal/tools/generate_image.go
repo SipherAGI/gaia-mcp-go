@@ -113,5 +113,7 @@ func (t *GenerateImageTool) Handler(ctx context.Context, req mcp.CallToolRequest
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to process image: %v", err)), nil
 	}
 
-	return mcp.NewToolResultImage("Image generated successfully", base64Data, mimeType), nil
+	msg := fmt.Sprintf("Image generated successfully. Image url: %s", res.Images[0])
+
+	return mcp.NewToolResultImage(msg, base64Data, mimeType), nil
 }
