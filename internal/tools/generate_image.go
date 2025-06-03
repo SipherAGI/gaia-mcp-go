@@ -2,21 +2,26 @@ package tools
 
 import (
 	"context"
+	"fmt"
 	"gaia-mcp-go/internal/api"
+	"gaia-mcp-go/pkg/imageutil"
 	"gaia-mcp-go/pkg/shared"
+	"log/slog"
 
 	"github.com/mark3labs/mcp-go/mcp"
 )
 
 // GenerateImageTool implements the GaiaTool interface
 type GenerateImageTool struct {
-	api  api.GaiaApi
-	tool mcp.Tool
+	api            api.GaiaApi
+	tool           mcp.Tool
+	imageProcessor *imageutil.Processor
 }
 
 func NewGenerateImageTool(api api.GaiaApi) *GenerateImageTool {
 	return &GenerateImageTool{
-		api: api,
+		api:            api,
+		imageProcessor: imageutil.NewDefaultProcessor(),
 		tool: mcp.NewTool(
 			"generate_image",
 			mcp.WithDescription("Generate images with Protogaia"),
@@ -43,6 +48,13 @@ func NewGenerateImageTool(api api.GaiaApi) *GenerateImageTool {
 			),
 		),
 	}
+}
+
+// NewGenerateImageToolWithProcessor creates a new GenerateImageTool with a custom image processor
+func NewGenerateImageToolWithProcessor(api api.GaiaApi, processor *imageutil.Processor) *GenerateImageTool {
+	tool := NewGenerateImageTool(api)
+	tool.imageProcessor = processor
+	return tool
 }
 
 func (t *GenerateImageTool) ToolName() string {
@@ -81,8 +93,25 @@ func (t *GenerateImageTool) Handler(ctx context.Context, req mcp.CallToolRequest
 		return mcp.NewToolResultError(*res.Error), nil
 	}
 
-	// TODO: The response is an url, but we need to return a base64 encoded image.
-	// We need to download the image from the url and then encode it to base64 and resize it to maximum 1024x1024
+	if res.Error != nil {
+		return mcp.NewToolResultError(*res.Error), nil
+	}
 
-	return mcp.NewToolResultText(res.Images[0]), nil
+	// Check if we actually received any images
+	if len(res.Images) == 0 {
+		// Log the response for debugging
+		slog.Warn("API returned success but no images",
+			"success", res.Success,
+			"images_length", len(res.Images),
+			"error", res.Error)
+		return mcp.NewToolResultError("No images were generated. Please try again."), nil
+	}
+
+	// Process the image using the imageutil package for MCP
+	base64Data, mimeType, err := t.imageProcessor.ProcessImageFromURLForMCP(ctx, res.Images[0])
+	if err != nil {
+		return mcp.NewToolResultError(fmt.Sprintf("Failed to process image: %v", err)), nil
+	}
+
+	return mcp.NewToolResultImage("Image generated successfully", base64Data, mimeType), nil
 }
