@@ -12,15 +12,13 @@ import (
 
 // GenerateImageTool implements the GaiaTool interface
 type GenerateImageTool struct {
-	api            api.GaiaApi
-	tool           mcp.Tool
-	imageProcessor *imageutil.Processor
+	api  api.GaiaApi
+	tool mcp.Tool
 }
 
-func NewGenerateImageTool(api api.GaiaApi, imageProcessor *imageutil.Processor) *GenerateImageTool {
+func NewGenerateImageTool(api api.GaiaApi) *GenerateImageTool {
 	return &GenerateImageTool{
-		api:            api,
-		imageProcessor: imageProcessor,
+		api: api,
 		tool: mcp.NewTool(
 			"generate_image",
 			mcp.WithDescription("Generate images with Protogaia"),
@@ -95,7 +93,7 @@ func (t *GenerateImageTool) Handler(ctx context.Context, req mcp.CallToolRequest
 	}
 
 	// Process the image using the imageutil package for MCP
-	base64Data, mimeType, err := t.imageProcessor.ProcessImageFromURLForMCP(ctx, res.Images[0])
+	base64Data, mimeType, err := imageutil.ProcessImageQuickForMCP(ctx, res.Images[0])
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to process image: %v", err)), nil
 	}

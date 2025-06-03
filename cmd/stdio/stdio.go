@@ -3,7 +3,6 @@ package stdio
 import (
 	"gaia-mcp-go/internal/api"
 	"gaia-mcp-go/internal/tools"
-	"gaia-mcp-go/pkg/imageutil"
 	"log/slog"
 	"os"
 
@@ -40,13 +39,10 @@ func runStdio(cmd *cobra.Command, args []string) {
 		ApiKey:  apiKey,
 	})
 
-	// image processor
-	imageProcessor := imageutil.NewDefaultProcessor()
-
 	// Create the tools
-	generateImageTool := tools.NewGenerateImageTool(apiClient, imageProcessor)
-	faceEnhancerTool := tools.NewFaceEnhancerTool(apiClient, imageProcessor)
-	remixTool := tools.NewRemixTool(apiClient, imageProcessor)
+	generateImageTool := tools.NewGenerateImageTool(apiClient)
+	faceEnhancerTool := tools.NewFaceEnhancerTool(apiClient)
+	remixTool := tools.NewRemixTool(apiClient)
 
 	// Create the server
 	s := server.NewMCPServer(

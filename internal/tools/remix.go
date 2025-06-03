@@ -11,18 +11,15 @@ import (
 )
 
 type RemixTool struct {
-	api            api.GaiaApi
-	tool           mcp.Tool
-	imageProcessor *imageutil.Processor
+	api  api.GaiaApi
+	tool mcp.Tool
 }
 
 func NewRemixTool(
 	api api.GaiaApi,
-	imageProcessor *imageutil.Processor,
 ) *RemixTool {
 	return &RemixTool{
-		api:            api,
-		imageProcessor: imageProcessor,
+		api: api,
 		tool: mcp.NewTool(
 			"remix",
 			mcp.WithDescription("Remix an image with a prompt"),
@@ -80,7 +77,7 @@ func (t *RemixTool) Handler(ctx context.Context, req mcp.CallToolRequest) (*mcp.
 		return mcp.NewToolResultError("No images were generated. Please try again."), nil
 	}
 
-	base64Data, mimeType, err := t.imageProcessor.ProcessImageFromURLForMCP(ctx, res.Images[0])
+	base64Data, mimeType, err := imageutil.ProcessImageQuickForMCP(ctx, res.Images[0])
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to process image: %v", err)), nil
 	}

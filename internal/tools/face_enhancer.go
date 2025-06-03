@@ -11,18 +11,15 @@ import (
 )
 
 type FaceEnhancerTool struct {
-	api            api.GaiaApi
-	tool           mcp.Tool
-	imageProcessor *imageutil.Processor
+	api  api.GaiaApi
+	tool mcp.Tool
 }
 
 func NewFaceEnhancerTool(
 	api api.GaiaApi,
-	imageProcessor *imageutil.Processor,
 ) *FaceEnhancerTool {
 	return &FaceEnhancerTool{
-		api:            api,
-		imageProcessor: imageProcessor,
+		api: api,
 		tool: mcp.NewTool(
 			"face_enhancer",
 			mcp.WithDescription("Enhance face's details in an existing image"),
@@ -77,7 +74,7 @@ func (t *FaceEnhancerTool) Handler(ctx context.Context, req mcp.CallToolRequest)
 		return mcp.NewToolResultError("No images were generated. Please try again."), nil
 	}
 
-	base64Data, mimeType, err := t.imageProcessor.ProcessImageFromURLForMCP(ctx, res.Images[0])
+	base64Data, mimeType, err := imageutil.ProcessImageQuickForMCP(ctx, res.Images[0])
 	if err != nil {
 		return mcp.NewToolResultError(fmt.Sprintf("Failed to process image: %v", err)), nil
 	}
