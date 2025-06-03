@@ -49,10 +49,10 @@ func (a *gaiaApi) CreateStyle(ctx context.Context, imageUrls []string, name stri
 		payload["description"] = *description
 	}
 
-	rb := a.client.PostJSON(ctx, "/api/sd-styles", payload, map[string]string{})
-
-	var sdStyle SdStyle
-	err := rb.Into(&sdStyle)
+	// Use the type-safe As[T] function - cleaner and more idiomatic
+	sdStyle, err := httpclient.As[SdStyle](
+		a.client.PostJSON(ctx, "/api/sd-styles", payload, map[string]string{}),
+	)
 	if err != nil {
 		return SdStyle{}, err
 	}
@@ -61,10 +61,10 @@ func (a *gaiaApi) CreateStyle(ctx context.Context, imageUrls []string, name stri
 }
 
 func (a *gaiaApi) GenerateImages(ctx context.Context, req GenerateImagesRequest) (ImageGeneratedResponse, error) {
-	rb := a.client.PostJSON(ctx, "/api/recipe/agi-tasks/create-task", req, map[string]string{})
-
-	var imageGeneratedResponse ImageGeneratedResponse
-	err := rb.Into(&imageGeneratedResponse)
+	// Use the type-safe As[T] function - cleaner and more idiomatic
+	imageGeneratedResponse, err := httpclient.As[ImageGeneratedResponse](
+		a.client.PostJSON(ctx, "/api/recipe/agi-tasks/create-task", req, map[string]string{}),
+	)
 	if err != nil {
 		return ImageGeneratedResponse{}, err
 	}
