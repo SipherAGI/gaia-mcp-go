@@ -1,0 +1,64 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+    - go generate ./...
+
+builds:
+  - id: gaia-mcp-go
+    main: ./main.go
+    binary: gaia-mcp-go
+    env:
+      - CGO_ENABLED=0
+    ldflags:
+      - -s -w
+      - -X gaia-mcp-go/version.Version={{.Version}}
+      - -X gaia-mcp-go/version.GitCommit={{.Commit}}
+      - -X gaia-mcp-go/version.BuildDate={{.Date}}
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64 # Windows ARM64 is less common, remove if needed
+
+archives:
+  - id: default
+    format: tar.gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    name_template: >-
+      {{- .ProjectName }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+
+checksum:
+  name_template: "checksums.txt"
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^chore:"
+      - "^ci:"
+
+release:
+  github:
+    owner: yourusername # Replace with your GitHub username
+    name: gaia-mcp-go # Replace with your repo name
+  draft: false
+  prerelease: auto
+  name_template: "Release v{{ .Version }}"

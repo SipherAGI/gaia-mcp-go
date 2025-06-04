@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"gaia-mcp-go/cmd/stdio"
+	"gaia-mcp-go/version"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -21,7 +22,7 @@ var (
 		RunE: func(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		},
-		Version: Version,
+		Version: version.Get().String(),
 	}
 )
 
@@ -46,6 +47,7 @@ func Execute() {
 }
 
 func init() {
+	rootCmd.SetVersionTemplate(`{{printf "%s" .Version}}`)
 	// Add subcommands
 	rootCmd.AddCommand(stdio.StdioCmd)
 }
