@@ -53,12 +53,50 @@ snapshot:
 
 changelog:
   sort: asc
+  use: github
   filters:
     exclude:
-      - "^docs:"
-      - "^test:"
-      - "^chore:"
-      - "^ci:"
+      # Only exclude very specific patterns that add no value to end users
+      - "^test.*:"
+      - "^ci.*:"
+      - "merge conflict"
+      - "Merge pull request"
+      - "Merge remote-tracking branch"
+      - "Merge branch"
+      - "go mod tidy"
+      - "^WIP:"
+      - "^wip:"
+  groups:
+    - title: 🚀 Features
+      regexp: '^.*?feat(\(.+\))??!?:.+$'
+      order: 0
+    - title: 🐛 Bug Fixes
+      regexp: '^.*?fix(\(.+\))??!?:.+$'
+      order: 1
+    - title: 📚 Documentation
+      regexp: '^.*?docs(\(.+\))??!?:.+$'
+      order: 2
+    - title: 🧹 Chores & Maintenance
+      regexp: '^.*?(chore|refactor|perf|style)(\(.+\))??!?:.+$'
+      order: 3
+    - title: Other Changes
+      order: 999
+  format: |
+    ## Changes
+
+    {{range .Groups}}### {{.Title}}
+    {{range .Commits}}- {{.Message}} {{with .AuthorUsername}}({{.}}){{end}}
+    {{end}}
+    {{end}}
+
+    {{if .NoteGroups}}
+    {{range .NoteGroups}}### {{.Title}}
+    {{range .Notes}}{{.}}
+    {{end}}
+    {{end}}
+    {{end}}
+
+    **Full Changelog**: {{.PreviousTag}}...{{.Tag}}
 
 release:
   github:
