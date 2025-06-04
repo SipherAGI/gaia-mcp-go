@@ -34,6 +34,12 @@ type UploadFile struct {
 	Uploaded bool `json:"uploaded"`
 }
 
+// UploadPart represents a completed upload part
+type UploadPart struct {
+	ETag       string `json:"eTag"`
+	PartNumber int    `json:"partNumber"`
+}
+
 // InitUploadResponse represents the response when initializing a file upload
 type InitUploadResponse struct {
 	// Key is the unique identifier for this upload session

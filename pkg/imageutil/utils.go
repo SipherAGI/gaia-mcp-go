@@ -157,3 +157,28 @@ func ProcessImageThumbnailForMCP(ctx context.Context, imageURL string) (base64Da
 func ProcessImageLargeForMCP(ctx context.Context, imageURL string) (base64Data string, mimeType string, err error) {
 	return ProcessImageWithSizeForMCP(ctx, imageURL, 2048, 2048)
 }
+
+// ProcessImageNoResize processes an image without any size constraints
+// This preserves the original image dimensions while still performing format conversion and compression
+func ProcessImageNoResize(ctx context.Context, imageURL string) (string, error) {
+	config := DefaultConfig()
+	// Set very large max dimensions to effectively disable resizing
+	// Using a large number that's unlikely to be exceeded by normal images
+	config.MaxWidth = 100000  // 100k pixels width
+	config.MaxHeight = 100000 // 100k pixels height
+
+	processor := NewProcessor(config)
+	return processor.ProcessImageFromURL(ctx, imageURL)
+}
+
+// ProcessImageNoResizeForMCP processes an image without resizing and returns data suitable for MCP
+// This is useful when you want to preserve original image dimensions for MCP responses
+func ProcessImageNoResizeForMCP(ctx context.Context, imageURL string) (base64Data string, mimeType string, err error) {
+	config := DefaultConfig()
+	// Set very large max dimensions to effectively disable resizing
+	config.MaxWidth = 100000  // 100k pixels width
+	config.MaxHeight = 100000 // 100k pixels height
+
+	processor := NewProcessor(config)
+	return processor.ProcessImageFromURLForMCP(ctx, imageURL)
+}
