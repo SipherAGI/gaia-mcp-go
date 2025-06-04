@@ -43,6 +43,8 @@ func runStdio(cmd *cobra.Command, args []string) {
 	generateImageTool := tools.NewGenerateImageTool(apiClient)
 	faceEnhancerTool := tools.NewFaceEnhancerTool(apiClient)
 	remixTool := tools.NewRemixTool(apiClient)
+	upscalerTool := tools.NewUpscalerTool(apiClient)
+	uploadImageTool := tools.NewUploadImageTool(apiClient)
 
 	// Create the server
 	s := server.NewMCPServer(
@@ -55,6 +57,8 @@ func runStdio(cmd *cobra.Command, args []string) {
 	s.AddTool(generateImageTool.MCPTool(), generateImageTool.Handler)
 	s.AddTool(faceEnhancerTool.MCPTool(), faceEnhancerTool.Handler)
 	s.AddTool(remixTool.MCPTool(), remixTool.Handler)
+	s.AddTool(upscalerTool.MCPTool(), upscalerTool.Handler)
+	s.AddTool(uploadImageTool.MCPTool(), uploadImageTool.Handler)
 
 	// Start the server
 	if err := server.ServeStdio(s); err != nil {
