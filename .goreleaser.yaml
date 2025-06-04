@@ -84,10 +84,15 @@ changelog:
   format: |
     ## Changes
 
+    {{- if .Groups}}
     {{range .Groups}}### {{.Title}}
     {{range .Commits}}- {{.Message}} {{with .AuthorUsername}}({{.}}){{end}}
     {{end}}
     {{end}}
+    {{- else}}
+    {{range .Commits}}- {{.Message}} {{with .AuthorUsername}}({{.}}){{end}}
+    {{end}}
+    {{- end}}
 
     {{if .NoteGroups}}
     {{range .NoteGroups}}### {{.Title}}
@@ -96,7 +101,11 @@ changelog:
     {{end}}
     {{end}}
 
+    {{- if .PreviousTag}}
     **Full Changelog**: {{.PreviousTag}}...{{.Tag}}
+    {{- else}}
+    **Full Changelog**: Initial release
+    {{- end}}
 
 release:
   github:
