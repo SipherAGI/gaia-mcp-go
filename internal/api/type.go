@@ -361,37 +361,6 @@ type Image struct {
 	Url string `json:"url"`
 }
 
-// RecipeType represents the type of recipe being executed
-type RecipeType string
-
-const (
-	// TODO: Replace these with actual values from gaiaRecipeType
-	RecipeTypeNormal RecipeType = "normal"
-	// Add other recipe types here: RecipeTypeAdvanced, RecipeTypeCustom, etc.
-)
-
-// RecipeTaskStatus represents the current status of a recipe task
-type RecipeTaskStatus string
-
-const (
-	// TODO: Replace these with actual values from gaiaRecipeTaskStatus
-	RecipeTaskStatusPending   RecipeTaskStatus = "pending"
-	RecipeTaskStatusRunning   RecipeTaskStatus = "running"
-	RecipeTaskStatusCompleted RecipeTaskStatus = "completed"
-	RecipeTaskStatusFailed    RecipeTaskStatus = "failed"
-	// Add other statuses here: RecipeTaskStatusCancelled, etc.
-)
-
-// QueueType represents the type of processing queue
-type QueueType string
-
-const (
-	// TODO: Replace these with actual values from gaiaQueueType
-	QueueTypeDefault  QueueType = "default"
-	QueueTypePriority QueueType = "priority"
-	// Add other queue types here: QueueTypeBatch, QueueTypeExpress, etc.
-)
-
 // RecipeTaskCreator represents the creator of a recipe task
 type RecipeTaskCreator struct {
 	// Uid is the unique identifier of the user who created the task
@@ -413,7 +382,7 @@ type RecipeTask struct {
 	RecipeId string `json:"recipeId"`
 
 	// RecipeType indicates the type of recipe (defaults to "normal")
-	RecipeType RecipeType `json:"recipeType"`
+	RecipeType shared.RecipeType `json:"recipeType"`
 
 	// Params contains optional parameters for the recipe execution
 	// Can be null if no custom parameters are provided
@@ -426,7 +395,7 @@ type RecipeTask struct {
 	Creator RecipeTaskCreator `json:"creator"`
 
 	// Status indicates the current execution status of the task
-	Status RecipeTaskStatus `json:"status"`
+	Status shared.RecipeTaskStatus `json:"status"`
 
 	// Priority determines the execution priority (higher numbers = higher priority)
 	Priority int `json:"priority"`
@@ -474,7 +443,7 @@ type RecipeTask struct {
 	ExecutionDuration *int `json:"executionDuration,omitempty"`
 
 	// QueueType indicates which processing queue this task uses (defaults to "default")
-	QueueType QueueType `json:"queueType"`
+	QueueType shared.QueueType `json:"queueType"`
 }
 
 type ImageGeneratedResponse struct {
