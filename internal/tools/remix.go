@@ -22,7 +22,7 @@ func NewRemixTool(
 		api: api,
 		tool: mcp.NewTool(
 			"remix",
-			mcp.WithDescription("Remix an image with a prompt"),
+			mcp.WithDescription("Create new variations of an existing image"),
 			mcp.WithString(
 				"inputImage",
 				mcp.Required(),
