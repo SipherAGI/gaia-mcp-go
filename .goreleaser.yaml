@@ -53,7 +53,6 @@ snapshot:
 
 changelog:
   sort: asc
-  use: github
   filters:
     exclude:
       # Only exclude very specific patterns that add no value to end users
@@ -66,46 +65,6 @@ changelog:
       - "go mod tidy"
       - "^WIP:"
       - "^wip:"
-  groups:
-    - title: 🚀 Features
-      regexp: '^.*?feat(\(.+\))??!?:.+$'
-      order: 0
-    - title: 🐛 Bug Fixes
-      regexp: '^.*?fix(\(.+\))??!?:.+$'
-      order: 1
-    - title: 📚 Documentation
-      regexp: '^.*?docs(\(.+\))??!?:.+$'
-      order: 2
-    - title: 🧹 Chores & Maintenance
-      regexp: '^.*?(chore|refactor|perf|style)(\(.+\))??!?:.+$'
-      order: 3
-    - title: Other Changes
-      order: 999
-  format: |
-    ## Changes
-
-    {{- if .Groups}}
-    {{range .Groups}}### {{.Title}}
-    {{range .Commits}}- {{.Message}} {{with .AuthorUsername}}({{.}}){{end}}
-    {{end}}
-    {{end}}
-    {{- else}}
-    {{range .Commits}}- {{.Message}} {{with .AuthorUsername}}({{.}}){{end}}
-    {{end}}
-    {{- end}}
-
-    {{if .NoteGroups}}
-    {{range .NoteGroups}}### {{.Title}}
-    {{range .Notes}}{{.}}
-    {{end}}
-    {{end}}
-    {{end}}
-
-    {{- if .PreviousTag}}
-    **Full Changelog**: {{.PreviousTag}}...{{.Tag}}
-    {{- else}}
-    **Full Changelog**: Initial release
-    {{- end}}
 
 release:
   github:
