@@ -22,11 +22,7 @@ func NewUploadImageTool(api api.GaiaApi) *UploadImageTool {
 			mcp.WithDescription("Upload an image to GAIA"),
 			mcp.WithArray(
 				"image_urls",
-				mcp.Items(mcp.WithString(
-					"image_url",
-					mcp.Required(),
-					mcp.Description("The URL of the image to upload"),
-				)),
+				mcp.Items(map[string]any{"type": "string"}),
 				mcp.Required(),
 				mcp.Description("The URLs of the images to upload"),
 			),
@@ -45,8 +41,29 @@ func (t *UploadImageTool) MCPTool() mcp.Tool {
 func (t *UploadImageTool) Handler(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
 	args := req.GetArguments()
 
-	imageUrls := args["image_urls"].([]string)
+	// First, get the raw value and check if it exists
+	rawImageUrls, exists := args["image_urls"]
+	if !exists {
+		return mcp.NewToolResultError("image_urls parameter is required"), nil
+	}
 
+	// Convert from []interface{} to []string safely
+	imageUrlsInterface, ok := rawImageUrls.([]interface{})
+	if !ok {
+		return mcp.NewToolResultError("image_urls must be an array"), nil
+	}
+
+	// Convert each interface{} element to string
+	imageUrls := make([]string, len(imageUrlsInterface))
+	for i, url := range imageUrlsInterface {
+		urlStr, ok := url.(string)
+		if !ok {
+			return mcp.NewToolResultError(fmt.Sprintf("image_urls[%d] must be a string", i)), nil
+		}
+		imageUrls[i] = urlStr
+	}
+
+	// Now we can safely use imageUrls as []string
 	uploadedFiles, err := t.api.UploadImages(ctx, imageUrls, shared.FileAssociatedResourceStyle)
 
 	if err != nil {

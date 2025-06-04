@@ -11,7 +11,7 @@ type UploadFile struct {
 	Name string `json:"name"`
 
 	// Size is the file size in bytes
-	Size int64 `json:"size"`
+	Size int64 `json:"size,string"`
 
 	// MimeType represents the file's MIME type (e.g., "image/jpeg", "text/plain")
 	MimeType string `json:"mimeType"`

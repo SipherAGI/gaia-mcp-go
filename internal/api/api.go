@@ -1,13 +1,15 @@
 package api
 
 import (
+	"bytes"
 	"context"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"gaia-mcp-go/pkg/httpclient"
 	"gaia-mcp-go/pkg/imageutil"
 	"gaia-mcp-go/pkg/shared"
+	"io"
+	"net/http"
 	"strings"
 	"sync"
 	"time"
@@ -241,32 +243,60 @@ func (a *gaiaApi) initUploadImage(
 		"chunkSize":          CHUNK_SIZE,
 	}
 
-	jsonData, err := json.Marshal(payload)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal request: %w", err)
-	}
-
-	// Send the request
-	initUploadResponse, err := httpclient.As[InitUploadResponse](
-		a.client.PostJSON(ctx, "/api/upload/initialize", jsonData, map[string]string{}),
+	// Send the request - the API returns an array of InitUploadResponse
+	initUploadResponses, err := httpclient.As[[]InitUploadResponse](
+		a.client.PostJSON(ctx, "/api/upload/initialize", payload, map[string]string{}),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to send request: %w", err)
 	}
 
-	return &initUploadResponse, nil
+	// Since we're uploading one file, we expect exactly one response
+	if len(initUploadResponses) < 1 {
+		return nil, fmt.Errorf("no upload responses received")
+	}
+
+	return &initUploadResponses[0], nil
 }
 
 func (a *gaiaApi) uploadChunk(ctx context.Context, chunk []byte, url string, partNumber int) (*UploadPart, error) {
-	req, err := a.client.PUT(ctx, url, chunk, map[string]string{
-		"Content-Type": "application/octet-stream",
-	})
+	// Create a direct HTTP request to the presigned S3 URL
+	// Don't use a.client.PUT() because it prepends the base URL
+	req, err := http.NewRequestWithContext(ctx, "PUT", url, bytes.NewReader(chunk))
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request for chunk %d: %w", partNumber, err)
+	}
+
+	// Set required headers for S3 upload
+	req.Header.Set("Content-Type", "application/octet-stream")
+	req.Header.Set("Content-Length", fmt.Sprintf("%d", len(chunk)))
+
+	// Create a new HTTP client for direct S3 uploads
+	httpClient := &http.Client{
+		Timeout: 60 * time.Second, // Longer timeout for large uploads
+	}
+
+	// Execute the request
+	resp, err := httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to upload chunk %d: %w", partNumber, err)
 	}
+	defer resp.Body.Close()
+
+	// Check for successful upload (S3 returns 200 for successful chunk uploads)
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("chunk %d upload failed with status %d: %s", partNumber, resp.StatusCode, string(body))
+	}
+
+	// Extract ETag from response headers (required for multipart upload completion)
+	etag := resp.Header.Get("ETag")
+	if etag == "" {
+		return nil, fmt.Errorf("missing ETag in response for chunk %d", partNumber)
+	}
 
 	uploadPart := &UploadPart{
-		ETag:       req.Header.Get("ETag"),
+		ETag:       etag,
 		PartNumber: partNumber,
 	}
 
@@ -274,25 +304,30 @@ func (a *gaiaApi) uploadChunk(ctx context.Context, chunk []byte, url string, par
 }
 
 func (a *gaiaApi) completeUpload(ctx context.Context, key, uploadId string, parts []UploadPart) error {
-	payload := map[string]interface{}{
-		"key":      key,
-		"uploadId": uploadId,
-		"parts":    parts,
-	}
-
-	jsonData, err := json.Marshal(payload)
-	if err != nil {
-		return fmt.Errorf("failed to marshal request: %w", err)
+	payload := []map[string]interface{}{
+		{
+			"key":      key,
+			"uploadId": uploadId,
+			"parts":    parts,
+		},
 	}
 
 	// Send the request
-	res, err := a.client.POST(ctx, "/api/upload/complete", jsonData, map[string]string{})
+	res, err := a.client.POST(ctx, "/api/upload/complete", payload, map[string]string{})
 	if err != nil {
 		return fmt.Errorf("failed to send request: %w", err)
 	}
+	defer res.Body.Close()
 
-	if res.StatusCode != 200 {
-		return fmt.Errorf("failed to complete upload: %s", res.Body)
+	// Read the response body for proper error handling
+	body, err := io.ReadAll(res.Body)
+	if err != nil {
+		return fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	// Check for successful completion
+	if res.StatusCode != http.StatusOK && res.StatusCode != http.StatusCreated {
+		return fmt.Errorf("failed to complete upload (status %d): %s", res.StatusCode, string(body))
 	}
 
 	return nil
