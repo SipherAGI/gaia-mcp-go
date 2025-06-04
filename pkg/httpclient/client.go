@@ -41,7 +41,6 @@ type Config struct {
 type APIError struct {
 	StatusCode int    `json:"status_code"`
 	Message    string `json:"message"`
-	Details    string `json:"details,omitempty"`
 }
 
 // Error implements the error interface for APIError
