@@ -3,6 +3,7 @@ package stdio
 import (
 	"gaia-mcp-go/internal/api"
 	"gaia-mcp-go/internal/tools"
+	"gaia-mcp-go/pkg/shared"
 	"log/slog"
 	"os"
 
@@ -35,7 +36,7 @@ func runStdio(cmd *cobra.Command, args []string) {
 
 	// Create the API client
 	apiClient := api.NewGaiaApi(api.GaiaApiConfig{
-		BaseUrl: "https://api.protogaia.com",
+		BaseUrl: shared.BASE_API_URL,
 		ApiKey:  apiKey,
 	})
 

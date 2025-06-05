@@ -1,0 +1,92 @@
+{
+  "generate_images_success": {
+    "success": true,
+    "images": [
+      "https://cdn.protogaia.com/generated/image123.jpg"
+    ],
+    "error": null
+  },
+  "generate_images_error": {
+    "success": false,
+    "images": [],
+    "error": "Generation failed due to invalid prompt"
+  },
+  "create_style_success": {
+    "id": "style_123",
+    "name": "Test Style",
+    "description": "A test style for unit testing",
+    "images": [
+      {
+        "url": "https://cdn.protogaia.com/style/image1.jpg",
+        "weight": 0.5
+      },
+      {
+        "url": "https://cdn.protogaia.com/style/image2.jpg",
+        "weight": 0.5
+      }
+    ],
+    "creator": {
+      "uid": "user_123",
+      "name": "Test User",
+      "email": "test@example.com",
+      "picture": "https://example.com/avatar.jpg",
+      "username": "testuser"
+    },
+    "tags": [],
+    "workspace": {
+      "id": "workspace_123",
+      "name": "Test Workspace",
+      "picture": "https://example.com/workspace.jpg"
+    },
+    "capabilities": {
+      "canEdit": true,
+      "canDelete": true,
+      "canShare": true
+    },
+    "createdAt": "2024-01-01T00:00:00Z",
+    "updatedAt": "2024-01-01T00:00:00Z",
+    "isPublic": false,
+    "isDeleted": false
+  },
+  "upload_init_success": {
+    "key": "upload_key_123",
+    "filename": "test_image.jpg",
+    "uploadId": "upload_123",
+    "uploadUrls": [
+      "https://s3.example.com/upload/part1",
+      "https://s3.example.com/upload/part2"
+    ],
+    "file": {
+      "id": "file_123",
+      "name": "test_image.jpg",
+      "size": "1024000",
+      "mimeType": "image/jpeg",
+      "url": "https://cdn.protogaia.com/files/file_123.jpg",
+      "ownerUid": "user_123",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "uploaded": false
+    }
+  },
+  "upload_files_success": [
+    {
+      "id": "file_123",
+      "name": "test_image1.jpg",
+      "size": "1024000",
+      "mimeType": "image/jpeg",
+      "url": "https://cdn.protogaia.com/files/file_123.jpg",
+      "ownerUid": "user_123",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "uploaded": true
+    },
+    {
+      "id": "file_124",
+      "name": "test_image2.jpg",
+      "size": "2048000",
+      "mimeType": "image/jpeg",
+      "url": "https://cdn.protogaia.com/files/file_124.jpg",
+      "ownerUid": "user_123",
+      "createdAt": "2024-01-01T00:00:00Z",
+      "uploaded": true
+    }
+  ]
+} 

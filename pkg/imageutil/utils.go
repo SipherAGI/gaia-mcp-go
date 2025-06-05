@@ -132,9 +132,23 @@ func ResizeImageToExactSize(img image.Image, width, height int) image.Image {
 
 // MCP-specific convenience functions that return pure base64 and MIME type
 
-// ProcessImageQuickForMCP processes an image with default settings and returns data suitable for MCP
-func ProcessImageQuickForMCP(ctx context.Context, imageURL string) (base64Data string, mimeType string, err error) {
+// ProcessImageDefaultForMCP processes an image with default settings and returns data suitable for MCP
+// Uses original default dimensions (1024x1024) and high quality (90) - may exceed MCP size limits for large images
+func ProcessImageDefaultForMCP(ctx context.Context, imageURL string) (base64Data string, mimeType string, err error) {
 	processor := NewDefaultProcessor()
+	return processor.ProcessImageFromURLForMCP(ctx, imageURL)
+}
+
+// ProcessImageQuickForMCP processes an image with MCP-optimized settings and returns data suitable for MCP
+// Uses smaller dimensions (512x512) and moderate quality (70) to stay under MCP size limits
+func ProcessImageQuickForMCP(ctx context.Context, imageURL string) (base64Data string, mimeType string, err error) {
+	// Use MCP-optimized configuration to avoid size limit errors
+	config := DefaultConfig()
+	config.MaxWidth = 512
+	config.MaxHeight = 512
+	config.JPEGQuality = 70 // Lower quality for smaller file size while maintaining visual quality
+
+	processor := NewProcessor(config)
 	return processor.ProcessImageFromURLForMCP(ctx, imageURL)
 }
 

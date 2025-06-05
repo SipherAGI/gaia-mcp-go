@@ -77,21 +77,28 @@ customImage, err := imageutil.ProcessImageWithSize(ctx, imageURL, 800, 600)
 For MCP (Model Context Protocol) applications that need pure base64 data without data URL prefixes:
 
 ```go
-// Process image for MCP with default settings
+// Process image for MCP with optimized settings (512x512, quality 70)
+// Recommended for most MCP use cases to avoid size limits
 base64Data, mimeType, err := imageutil.ProcessImageQuickForMCP(ctx, imageURL)
 
-// Create thumbnail for MCP
+// Process image for MCP with default settings (1024x1024, quality 90)
+// May exceed MCP size limits for large images
+base64Data, mimeType, err := imageutil.ProcessImageDefaultForMCP(ctx, imageURL)
+
+// Create thumbnail for MCP (256x256)
 base64Data, mimeType, err := imageutil.ProcessImageThumbnailForMCP(ctx, imageURL)
 
-// Create large image for MCP
+// Create large image for MCP (2048x2048)
 base64Data, mimeType, err := imageutil.ProcessImageLargeForMCP(ctx, imageURL)
 
 // Custom size for MCP
 base64Data, mimeType, err := imageutil.ProcessImageWithSizeForMCP(ctx, imageURL, 800, 600)
 
 // Use in MCP tool result
-return mcp.NewToolResultImage(base64Data, mimeType, "Description")
+return mcp.NewToolResultImage("Description", base64Data, mimeType)
 ```
+
+**Note**: `ProcessImageQuickForMCP` is now optimized for MCP size constraints (512x512 max, 70% quality) to prevent "result exceeds maximum length" errors in Claude Desktop and other MCP clients.
 
 ### Utility Functions
 
